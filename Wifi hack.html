@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WiFi Scanner</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .wifi-container {
+            display: grid;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .wifi-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: 3px solid transparent;
+        }
+
+        .wifi-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        }
+
+        .wifi-card.selected {
+            border-color: #4CAF50;
+            background: linear-gradient(135deg, #4CAF50, #45a049);
+            color: white;
+        }
+
+        .wifi-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .wifi-icon {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #4CAF50, #45a049);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: white;
+        }
+
+        .wifi-card.selected .wifi-icon {
+            background: rgba(255,255,255,0.2);
+        }
+
+        .wifi-details h3 {
+            font-size: 1.4rem;
+            margin-bottom: 5px;
+        }
+
+        .wifi-signal {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .wifi-card.selected .wifi-signal {
+            color: rgba(255,255,255,0.8);
+        }
+
+        .password-section {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            display: none;
+        }
+
+        .password-section.show {
+            display: block;
+            animation: slideUp 0.5s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .password-section h2 {
+            color: #333;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .password-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .password-item {
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            padding: 20px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .password-item:hover {
+            border-color: #4CAF50;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(76, 175, 80, 0.2);
+        }
+
+        .password-label {
+            color: #666;
+            font-size: 0.85rem;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .password-text {
+            font-family: 'Courier New', monospace;
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #333;
+            word-break: break-all;
+        }
+
+        .generate-btn {
+            width: 100%;
+            background: linear-gradient(135deg, #4CAF50, #45a049);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .generate-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(76, 175, 80, 0.4);
+        }
+
+        .no-selection {
+            text-align: center;
+            color: rgba(255,255,255,0.8);
+            font-size: 1.1rem;
+            padding: 40px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .wifi-card {
+                padding: 20px;
+            }
+            
+            .wifi-icon {
+                width: 40px;
+                height: 40px;
+                font-size: 1.2rem;
+            }
+            
+            .password-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📶 WiFi Scanner</h1>
+            <p>Pilih jaringan WiFi untuk melihat kemungkinan password</p>
+        </div>
+
+        <div class="wifi-container" id="wifiList">
+            <!-- WiFi cards akan di-generate oleh JavaScript -->
+        </div>
+
+        <div class="password-section" id="passwordSection">
+            <h2>🔐 Kemungkinan Password untuk <span id="selectedNetwork">Jaringan</span></h2>
+            <div class="password-grid" id="passwordGrid">
+                <!-- Password suggestions akan di-generate oleh JavaScript -->
+            </div>
+            <button class="generate-btn" onclick="generatePasswords()">
+                🎲 Generate Password Baru
+            </button>
+        </div>
+
+        <div class="no-selection" id="noSelection" style="display: block;">
+            <p>Pilih salah satu jaringan WiFi di atas untuk memulai</p>
+        </div>
+    </div>
+
+    <script>
+        // Data WiFi simulasi
+        const wifiNetworks = [
+            { name: "Rumah_123", signal: "🔥 95%", id: 1 },
+            { name: "Indihome_Wifi", signal: "💪 87%", id: 2 },
+            { name: "Fiberhome_2.4G", signal: "👍 76%", id: 3 },
+            { name: "MyTelkomsel", signal: "📡 68%", id: 4 },
+            { name: "Biznet_Home", signal: "⚡ 92%", id: 5 },
+            { name: "XL_HOME_456", signal: "🌟 81%", id: 6 }
+        ];
+
+        let selectedNetwork = null;
+
+        // Generate password simulasi
+        function generatePassword() {
+            const patterns = [
+                "password123",
+                "12345678",
+                "admin123",
+                "wifi1234",
+                "rumah123",
+                "indihome1",
+                "qwertyui",
+                "123456789",
+                "welcome1",
+                "abc123def"
+            ];
+            
+            const randomNums = Math.random().toString().slice(2, 8);
+            const randomLetters = Math.random().toString(36).slice(2, 8).toUpperCase();
+            
+            return [
+                patterns[Math.floor(Math.random() * patterns.length)],
+                randomNums,
+                randomLetters,
+                `wifi${randomNums}`,
+                `${patterns[Math.floor(Math.random() * 3)]}${Math.floor(Math.random() * 100)}`,
+                `123${randomLetters}`
+            ];
+        }
+
+        // Render daftar WiFi
+        function renderWifiList() {
+            const wifiList = document.getElementById('wifiList');
+            wifiList.innerHTML = wifiNetworks.map(network => `
+                <div class="wifi-card" onclick="selectNetwork(${network.id})">
+                    <div class="wifi-info">
+                        <div class="wifi-icon">📶</div>
+                        <div class="wifi-details">
+                            <h3>${network.name}</h3>
+                            <div class="wifi-signal">${network.signal}</div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Pilih jaringan
+        function selectNetwork(networkId) {
+            // Reset semua card
+            document.querySelectorAll('.wifi-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+
+            // Highlight card yang dipilih
+            const selectedCard = document.querySelector(`[onclick="selectNetwork(${networkId})"]`);
+            selectedCard.classList.add('selected');
+
+            // Set jaringan terpilih
+            selectedNetwork = wifiNetworks.find(n => n.id === networkId);
+            document.getElementById('selectedNetwork').textContent = selectedNetwork.name;
+
+            // Tampilkan section password
+            document.getElementById('passwordSection').classList.add('show');
+            document.getElementById('noSelection').style.display = 'none';
+
+            // Generate password pertama
+            generatePasswords();
+        }
+
+        // Generate password baru
+        function generatePasswords() {
+            const passwordGrid = document.getElementById('passwordGrid');
+            const passwords = generatePassword();
+            
+            passwordGrid.innerHTML = passwords.map((password, index) => `
+                <div class="password-item" onclick="copyPassword('${password}')">
+                    <div class="password-label">Saran ${index + 1}</div>
+                    <div class="password-text">${password}</div>
+                </div>
+            `).join('');
+        }
+
+        // Copy password ke clipboard
+        function copyPassword(password) {
+            navigator.clipboard.writeText(password).then(() => {
+                // Visual feedback
+                const item = event.target.closest('.password-item');
+                const originalText = item.querySelector('.password-text').textContent;
+                item.querySelector('.password-text').textContent = '✅ Disalin!';
+                setTimeout(() => {
+                    item.querySelector('.password-text').textContent = originalText;
+                }, 2000);
+            });
+        }
+
+        // Inisialisasi aplikasi
+        document.addEventListener('DOMContentLoaded', () => {
+            renderWifiList();
+        });
+    </script>
+</body>
+</html>
